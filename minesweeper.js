@@ -1,5 +1,3 @@
-var difficulty = 'difficulty-0';
-var difficultyArray = [8, 10, 13];
 var game;
 
 function sleep(ms) {
@@ -7,39 +5,22 @@ function sleep(ms) {
 }
 
 $(document).ready( () => {
-    $('.difficulty-button').click( (e) => {
-        if(!$(e.target).hasClass('active-difficulty')) {
-            $(`#${difficulty}`).removeClass('active-difficulty');
-            $(e.target).addClass('active-difficulty');
-            difficulty = $(e.target).attr('id');
-        }
-    });
-
-    $('#start-game-button').click( async () => {
-        let diff = parseInt(difficulty.match(/(\d+)/));
-        let dimensions = difficultyArray[diff];
-        game = await new Minesweeper(dimensions);
-        game.init();
-    });
-
-    $('#play-again-button').click( async () => {
-        $('#postgame').css('display', 'none');
-        $('#pregame').css('display', 'flex');
-        game = null;
-    });
+    game = new Minesweeper();
 });
 
 
 class Minesweeper {
-    constructor(dimension) {
-        this.dimensions = dimension;
+    constructor() {
+        this.difficulty = 'difficulty-0';
+        this.difficultyArray = [8, 9, 10];
+        this.dimensions = 0;
         this.pixels = $('#minesweeper').width();
-        this.blockPixels = this.pixels / this. dimensions;
+        this.blockPixels = 0;
         this.model = [];
         this.clicked = {};
         this.mines = {};
         this.flags = {};
-        this.numMines = Math.max(Math.floor((parseInt(dimension) * parseInt(dimension)) / 10), dimension);
+        this.numMines = 0;
         this.numDigs = 0;
         this.container = '#minesweeper';
         this.overlay = '#overlay';
@@ -53,6 +34,68 @@ class Minesweeper {
         this.html = '';
         this.isLive = true;
 
+        $('.difficulty-button').click( (e) => {
+            if(!$(e.target).hasClass('active-difficulty')) {
+                $(`#${this.difficulty}`).removeClass('active-difficulty');
+                $(e.target).addClass('active-difficulty');
+                this.difficulty = $(e.target).attr('id');
+            }
+        });
+
+        $('#start-game-button').click( async () => {
+            this.init();
+        });
+    
+        $('#play-again-button').click( async () => {
+            $('#postgame').css('display', 'none');
+            $('#pregame').css('display', 'flex');
+        });
+
+        $(this.shovel).click( (e) => {
+            if(this.isLive) {
+                let element = e.target;
+                if($(element).attr('id') != 'shovel') {
+                    element = $(e.target).parent();
+                }
+    
+                if(!$(element).hasClass('active-tool')) {
+                    $(element).addClass('active-tool')
+                    this.tool = 'shovel';
+                }
+                $(this.flag).removeClass('active-tool');
+            }
+        });
+
+        $(this.flag).click( (e) => {
+            if(this.isLive) {
+                let element = e.target;
+                if($(element).attr('id') != 'flag') {
+                    element = $(e.target).parent();
+                }
+
+                if(!$(element).hasClass('active-tool')) {
+                    $(element).addClass('active-tool')
+                    this.tool = 'flag';
+                }
+                $(this.shovel).removeClass('active-tool');
+            }
+        });
+    }
+
+    init() {
+        let diff = parseInt(this.difficulty.match(/(\d+)/));
+        this.dimensions = this.difficultyArray[diff];
+
+        this.model = [];
+        this.clicked = {};
+        this.mines = {};
+        this.flags = {};
+        this.blockPixels = this.pixels / this.dimensions;
+        this.numMines = Math.max(Math.floor((parseInt(this.dimensions) * parseInt(this.dimensions)) / 10), this.dimensions);
+        this.numDigs = 0;
+        this.html = '';
+        this.isLive = true;
+
         // MODEL KEYS ==> (0-8 = num mines around, 9 = MINE)
         for(let i=0; i<this.dimensions; i++) {
             this.model.push(new Array(this.dimensions).fill(0));
@@ -63,10 +106,7 @@ class Minesweeper {
             this.mines[i.toString()] = [];
             this.flags[i.toString()] = [];
         }
-    }
 
-    init() {
-        console.log(`numMines = ${this.numMines}`);
         for(let i=0; i<this.numMines; i++) {
             this.addRandomMine();
         }
@@ -74,33 +114,7 @@ class Minesweeper {
         $(this.container).css('grid-template-rows', `repeat(${this.dimensions}, 1fr)`);
         $(this.container).css('grid-template-columns', `repeat(${this.dimensions}, 1fr)`)
 
-        $(this.shovel).addClass('active-tool');
-
-        $(this.shovel).click( (e) => {
-            let element = e.target;
-            if($(element).attr('id') != 'shovel') {
-                element = $(e.target).parent();
-            }
-
-            if(!$(element).hasClass('active-tool')) {
-                $(element).addClass('active-tool')
-                this.tool = 'shovel';
-            }
-            $(this.flag).removeClass('active-tool');
-        });
-
-        $(this.flag).click( (e) => {
-            let element = e.target;
-            if($(element).attr('id') != 'flag') {
-                element = $(e.target).parent();
-            }
-
-            if(!$(element).hasClass('active-tool')) {
-                $(element).addClass('active-tool')
-                this.tool = 'flag';
-            }
-            $(this.shovel).removeClass('active-tool');
-        });
+        $(this.shovel).click()
 
         $(this.pregame).css('display', 'none');
         $(this.overlay).css('display', 'none');
