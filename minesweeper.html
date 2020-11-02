@@ -1,0 +1,46 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JBD Minesweeper</title>
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <!-- Corresponding js and css files -->
+    <link rel="stylesheet" type="text/css" href="minesweeper.css">
+    <script type="text/javascript" src="minesweeper.js"></script>
+</head>
+
+<body>
+    <div id="container">
+        <div id="game-container">
+            <h1 id="title">Mine Sweeper!</h1>
+            <div id="minesweeper-container">
+                <div id="overlay">
+                    <div id="difficulty-container">
+                        <h1 id="difficulty-label">Difficulty</h1>
+                        <div id="difficulty-buttons-container">
+                            <button class="difficulty-button active-difficulty" id="difficulty-0">1</button>
+                            <button class="difficulty-button" id="difficulty-1">2</button>
+                            <button class="difficulty-button" id="difficulty-2">3</button>
+                        </div>
+                    </div>
+                    <button id="start-game-button">Play</button>
+                </div>
+                <div id="minesweeper">
+                    <div class="active-block" id="0-0"></div>
+                    <div class="active-block" id="0-0"></div>
+                    <div class="active-block" id="0-0"></div>
+                    <div class="active-block flagged" id="0-0"></div>
+                    <div class="inactive-block" id="0-0">1</div>
+                </div>
+            </div>
+            <div id="tool-container">
+                <button class="tool-button" id="shovel"><img src="resources/shovel.svg" alt="Shovel icon" class="tool-image"></button>
+                <button class="tool-button" id="flag"><img src="resources/flag.svg" alt="Flag icon" class="tool-image"></button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
