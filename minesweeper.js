@@ -1,7 +1,10 @@
 var difficulty = 'difficulty-0';
-var difficultyArray = [10, 15, 20];
+var difficultyArray = [8, 10, 13];
 var game;
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 $(document).ready( () => {
     $('.difficulty-button').click( (e) => {
@@ -15,9 +18,14 @@ $(document).ready( () => {
     $('#start-game-button').click( async () => {
         let diff = parseInt(difficulty.match(/(\d+)/));
         let dimensions = difficultyArray[diff];
-        $('#overlay').css('display', 'none');
         game = await new Minesweeper(dimensions);
         game.init();
+    });
+
+    $('#play-again-button').click( async () => {
+        $('#postgame').css('display', 'none');
+        $('#pregame').css('display', 'flex');
+        game = null;
     });
 });
 
@@ -31,13 +39,19 @@ class Minesweeper {
         this.clicked = {};
         this.mines = {};
         this.flags = {};
-        this.numMines = Math.floor((parseInt(dimension) * parseInt(dimension)) / 10);
+        this.numMines = Math.max(Math.floor((parseInt(dimension) * parseInt(dimension)) / 10), dimension);
         this.numDigs = 0;
+        this.container = '#minesweeper';
+        this.overlay = '#overlay';
+        this.pregame = '#pregame';
+        this.postgame = '#postgame';
+        this.resultTitle = '#result-title';
+        this.resultMessage = '#result-message';
         this.shovel = '#shovel';
         this.flag = '#flag';
         this.tool = 'shovel';
-        this.container = '#minesweeper'
         this.html = '';
+        this.isLive = true;
 
         // MODEL KEYS ==> (0-8 = num mines around, 9 = MINE)
         for(let i=0; i<this.dimensions; i++) {
@@ -88,15 +102,69 @@ class Minesweeper {
             $(this.shovel).removeClass('active-tool');
         });
 
+        $(this.pregame).css('display', 'none');
+        $(this.overlay).css('display', 'none');
+
         this.updateHTML();
     }
 
-    gameOver() {
-        // Handle game over
+    reset() {
+
     }
 
-    victory() {
+    async mineClicked(x, y) {
+        this.isLive = false;
 
+        let minesArr = [];
+
+        for(let i=0; i<this.dimensions; i++) {
+            this.mines[i.toString()].forEach(element => {
+                console.log(`Mine at: ${i}, ${element}`);
+                if(i != x || element != y) {
+                    console.log(`Added mine: ${i}, ${element}`);
+                    minesArr.push([i, element]);
+                }
+            });
+        }
+
+        // Explode clicked mine first
+        await this.explodeMine(x, y);
+        await sleep(150);
+
+        // Explode rest of mines
+        for(let i=0; i<minesArr.length; i++) {
+            await this.explodeMine(minesArr[i][0], minesArr[i][1]);
+            await sleep(150);
+        }
+
+        this.gameOver();
+    }
+
+    async explodeMine(x, y) {
+        $(`#${x}-${y}`).addClass('mine');
+        $(this.container+'-container').addClass('shake');
+        await sleep(200);
+        $(this.container+'-container').removeClass('shake');
+    }
+
+    async gameOver() {
+        this.isLive = false;
+        await sleep(200);
+
+        $(this.resultTitle).text('Game Over');
+        $(this.resultMessage).text('You hit a mine!');
+        $(this.postgame).css('display', 'flex');
+        $(this.overlay).css('display', 'flex');
+    }
+
+    async victory() {
+        this.isLive = false;
+        await sleep(200);
+
+        $(this.resultTitle).text('Victory!');
+        $(this.resultMessage).text('You cleared all the mines');
+        $(this.postgame).css('display', 'flex');
+        $(this.overlay).css('display', 'flex');
     }
 
     addRandomMine() {
@@ -129,7 +197,7 @@ class Minesweeper {
         }
     }
 
-    updateHTML() {
+    async updateHTML() {
         this.html = '';
         for(let i=0; i<this.dimensions; i++) {
             for(let j=0; j<this.dimensions; j++) {
@@ -139,7 +207,7 @@ class Minesweeper {
             }
         }
 
-        $(this.container).html(this.html);
+        await $(this.container).html(this.html);
 
         $('.active-block').click( (e) => {
             let id = $(e.target).attr('id');
@@ -168,22 +236,24 @@ class Minesweeper {
     }
 
     blockClicked(x, y) {
-        if(this.tool === 'shovel') {
-            console.log(`Tool = shovel`);
-            // Block is a mine
-            if(this.mines[x.toString()].includes(y)) {
-                console.log(`MINE!`);
-                this.gameOver();
-                return;
+        if(this.isLive) {
+            if(this.tool === 'shovel') {
+                console.log(`Tool = shovel`);
+                // Block is a mine
+                if(this.mines[x.toString()].includes(y)) {
+                    console.log(`MINE!`);
+                    this.mineClicked(x, y);
+                    return;
+                }
+                this.numDigs++;
+                this.clicked[x.toString()].push(y);
             }
-            this.clicked[x.toString()].push(y);
+            else if(this.tool === 'flag') {
+                console.log(`Tool = flag`);
+                this.swapFlag(x, y);
+            }
+            // UPDATE HTML
+            this.updateHTML();
         }
-        else if(this.tool === 'flag') {
-            console.log(`Tool = flag`);
-            this.swapFlag(x, y);
-        }
-        // UPDATE HTML
-        this.numDigs++;
-        this.updateHTML();
     }
 }

@@ -18,22 +18,28 @@
             <h1 id="title">Mine Sweeper!</h1>
             <div id="minesweeper-container">
                 <div id="overlay">
-                    <div id="difficulty-container">
-                        <h1 id="difficulty-label">Difficulty</h1>
-                        <div id="difficulty-buttons-container">
-                            <button class="difficulty-button active-difficulty" id="difficulty-0">1</button>
-                            <button class="difficulty-button" id="difficulty-1">2</button>
-                            <button class="difficulty-button" id="difficulty-2">3</button>
+                    <div id="pregame">
+                        <div id="difficulty-container">
+                            <h1 id="difficulty-label">Difficulty</h1>
+                            <div id="difficulty-buttons-container">
+                                <button class="difficulty-button active-difficulty" id="difficulty-0">1</button>
+                                <button class="difficulty-button" id="difficulty-1">2</button>
+                                <button class="difficulty-button" id="difficulty-2">3</button>
+                            </div>
                         </div>
+                        <button id="start-game-button">Play</button>
                     </div>
-                    <button id="start-game-button">Play</button>
+
+                    <div id="postgame">
+                        <div id="result-container">
+                            <h1 id="result-title">Game Over</h1>
+                            <h2 id="result-message">You cleared all the mines</h2>
+                        </div>
+                        <button id="play-again-button">Play Again</button>
+                    </div>
                 </div>
                 <div id="minesweeper">
-                    <div class="active-block" id="0-0"></div>
-                    <div class="active-block" id="0-0"></div>
-                    <div class="active-block" id="0-0"></div>
-                    <div class="active-block flagged" id="0-0"></div>
-                    <div class="inactive-block" id="0-0">1</div>
+
                 </div>
             </div>
             <div id="tool-container">
